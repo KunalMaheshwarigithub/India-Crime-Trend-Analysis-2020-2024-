@@ -35,14 +35,16 @@ The project uses a single table: **`crime_data`**
 
 ## ⚙️ Technologies Used
 
-- MySQL (Queries and Analysis)
+- MySQL Wrokbench and Server (Queries and Analysis)
 
 
 ---
+## Published an Article on linkedin upon this Analysis, to view follow this link: 
+https://www.linkedin.com/posts/kunal-maheshwari-189777251_unveiling-crime-patterns-through-data-analysis-activity-7307146261730680833-LMWN?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD46SzkBJMRQQ3lUIGLLoI9Dd4a_O3sq3T4
 
-## Presentation
+## Analysis Description
 
-Each insight is backed by SQL queries and result grids, demonstrating how raw data transforms into meaningful conclusions.
+Each insight is backed by SQL queries, demonstrating how raw data transforms into meaningful conclusions.
 
 🔍 Crime Trends & Patterns: A Data-Driven Analysis
 # 📊 1. Most Common Crimes (Jan 2020 - Aug 2024) 
@@ -237,7 +239,7 @@ WHERE `Crime Domain` = 'Violent Crime'
 GROUP BY Age_Group
 ORDER BY Total_Cases DESC;
 
-# Article Insights:
+# Key Insights:
 🔺 Most victims (55.46%) are over 40 years old, making them the most vulnerable to violent crimes.
 
 🟠 Adults aged 19–40 are the second most affected group.
@@ -250,30 +252,40 @@ This shows that elderly and middle-aged people face a disproportionately high ri
 # 👶🧑🦳 Who Are the Most Targeted Age Groups in Violent Crimes?
 
 # Query : 
+SELECT 
+  CASE
+    WHEN `Victim Age` <= 18 THEN 'Age Group under 18yrs'
+    WHEN `Victim Age` BETWEEN 19 AND 40 THEN 'Age Group of (19-40)yrs'
+    WHEN `Victim Age` > 40 THEN 'Age Group of more than 40yrs'
+  END AS Age_Group,
+  COUNT(*) AS Total_Cases,
+  ((COUNT(*) * 100.0) / (SELECT COUNT(*) FROM crime_data)) AS `Victim Age Distribution(%)`
+FROM crime_data
+WHERE `Crime Domain` = 'Violent Crime'
+GROUP BY Age_Group
+ORDER BY Total_Cases DESC;
 
-Article content
+# Key Intakes
+🔺 Most victims (55.46%) are over 40 years old, making them the most vulnerable to violent crimes.
 
+🟠 Adults aged 19–40 are the second most affected group.
 
-Article content
-🔹 Older individuals face the highest risk, requiring better security and awareness.
-
-🔹 Young adults are also significantly impacted, emphasizing the need for crime prevention strategies.
-
-🔹 Minors, though lower in numbers, are still at risk, making child protection policies crucial.
+🧒 Children and teenagers (under 18) form the smallest group, but still a concerning 12.75%.
 
 
 
- 🚻 2.Gender-Wise Crime Distribution (2020-2024) 🔎
+ # 🚻 2.Gender-Wise Crime Distribution (2020-2024) 🔎
 
-Query : 
+# Query : 
+SELECT 
+  `Victim Gender`,
+  COUNT(*) AS Total_Cases,
+  ((COUNT(*) * 100.0) / (SELECT COUNT(*) FROM crime_data)) AS `Victim Gender Distribution(%)`
+FROM crime_data
+GROUP BY `Victim Gender`
+ORDER BY `Victim Gender Distribution(%)` DESC;
 
-Article content
-Result Grid : 
-
-
-
-Article content
-🔎 Key Observations:
+# 🔎 Key Observations:
 👩 Female Victims (F):
 
 The highest percentage of cases (55.83%) involve female victims.
@@ -290,19 +302,16 @@ Crimes involving assault, robbery, and homicide are more common.
 This highlights the growing need for awareness and protection of marginalized gender groups.
 
 
+# 🚔 Law Enforcement Effectiveness: A Deep Dive into Case Closures
+# 🔎 Case Closure Rate Analysis (2020-2024): How Efficient Is the Justice System?
 
+# Query : 
+SELECT 
+  (COUNT(CASE WHEN `Case Closed` = 'Yes' THEN 1 END) * 100.0 / COUNT(*)) AS `Case_Closure_rate(%)`,
+  (COUNT(CASE WHEN `Case Closed` = 'No' THEN 1 END) * 100.0 / COUNT(*)) AS `Pending_case_rate(%)`
+FROM crime_data;
 
-
-🚔 Law Enforcement Effectiveness: A Deep Dive into Case Closures
-🔎 Case Closure Rate Analysis (2020-2024): How Efficient Is the Justice System?
-
-Query : 
-
-Article content
-Result Grid : 
-
-Article content
-⚖️ What This Means:
+# ⚖️ What This Means:
 📌 Nearly half of all cases are still pending, raising concerns about delays in justice. 
 
 📌 An efficient legal system should aim for a higher closure rate to ensure victim support and reduce case backlog. 
@@ -311,40 +320,42 @@ Article content
 
 
 
-⏳ How Long Does It Take to Close a Case? A Deep Dive into Case Closure Time
+# ⏳ How Long Does It Take to Close a Case? A Deep Dive into Case Closure Time
 Top 10 Cases That Took the Longest to Close
 
-Query : 
+# Query : 
+SELECT 
+  `Date Reported`,
+  `Date Case Closed`,
+  City,
+  `Crime Description`,
+  `Victim Age`,
+  `Victim Gender`,
+  DATEDIFF(`Date Case Closed`, `Date Reported`) AS `Days Taken to Close`
+FROM crime_data
+WHERE `Case Closed` = 'Yes'
+ORDER BY `Days Taken to Close` DESC
+LIMIT 10;
 
+# Key Insights :
+⏳ 729 days (2 years) is the longest duration taken to close multiple cases.
 
+These long durations include serious crimes like HOMICIDE and SEXUAL ASSAULT.
 
-Article content
-Result Grid : 
+Cases are from cities like Mumbai, Kanpur, Pune, Chennai, Hyderabad, Delhi, etc.
 
-Article content
-Top 10 Cases That Took the Longest to Close
-Top 10 Cases Which took least days to close the case
+Some victims were as young as 10 and as old as 75, indicating age is not a deciding factor in how fast cases are closed.
 
+Gender marked as X appears in multiple long-duration cases, possibly suggesting missing/undisclosed data.
 
+# Average Case Closure Time 
+# Query :
+SELECT 
+  AVG(DATEDIFF(`Date Case Closed`, `Date Reported`)) AS `Avg Days Taken`
+FROM crime_data
+WHERE `Case Closed` = 'Yes';
 
-Query : 
-
-
-
-Article content
-Result Grid : 
-
-Article content
-Average Case Closure Time 
-
-Query :
-
-
-
-Article content
-Result Grid :
-
-Article content
+# Key Insights
 📌 Top 10 Longest Case Closures The cases with the longest resolution times took between 727 to 729 days to close. These cases predominantly involved homicide and sexual assault, with victims from various age groups and genders.
 
 📌 Fastest Case Closures On the other hand, several cases—mostly related to public intoxication and traffic violations—were closed in just 1 day.
@@ -356,3 +367,64 @@ Article content
 🚨 Serious crimes take significantly longer to resolve, often spanning years.
 ⚡ Minor offenses are handled swiftly, typically closed within a day.
 🔄 Law enforcement efficiency varies, and improving the resolution of severe crimes remains a challenge
+
+# 🔎 17. Top 25 Cities in Sexual Assault (Time, Gender, Age)
+# Query :
+WITH crime_time AS (
+  SELECT 
+    CASE 
+      WHEN HOUR(`Time of Occurrence`) BETWEEN 0 AND 3 THEN 'Late Night (12 AM - 4 AM)'
+      WHEN HOUR(`Time of Occurrence`) BETWEEN 4 AND 7 THEN 'Early Morning (4 AM - 7 AM)'
+      WHEN HOUR(`Time of Occurrence`) BETWEEN 8 AND 11 THEN 'Early Morning (8 AM - 12 PM)'
+      WHEN HOUR(`Time of Occurrence`) BETWEEN 12 AND 15 THEN 'Afternoon (12 PM - 4 PM)'
+      WHEN HOUR(`Time of Occurrence`) BETWEEN 16 AND 19 THEN 'Evening (4 PM - 8 PM)'
+      WHEN HOUR(`Time of Occurrence`) BETWEEN 20 AND 23 THEN 'Night (8 PM - 12 PM)'
+    END AS `Crime Hour`,
+    `Victim Gender`,
+    CASE 
+      WHEN `Victim Age` BETWEEN 0 AND 17 THEN 'Teenagers & Children (0-17 yrs)'
+      WHEN `Victim Age` BETWEEN 18 AND 30 THEN 'Adults (18-30 yrs)'
+      WHEN `Victim Age` BETWEEN 31 AND 50 THEN 'Middle Aged (31-50 yrs)'
+      ELSE 'Elderly (50+ yrs)'
+    END AS `Victim Age Group`,
+    City,
+    `Crime Description`
+  FROM crime_data 
+  WHERE `Crime Domain` = 'Violent Crime' AND `Crime Description` = "SEXUAL ASSAULT"
+),
+crime_stats AS (
+  SELECT 
+    `Crime Hour`, `Victim Gender`, `Victim Age Group`, City, `Crime Description`,
+    COUNT(*) AS Total_Cases, 
+    (COUNT(*) * 100.0) / (SELECT COUNT(*) 
+                          FROM crime_data 
+                          WHERE `Crime Domain` = 'Violent Crime' AND `Crime Description` = "SEXUAL ASSAULT") AS `Crime Percentage`
+  FROM crime_time
+  GROUP BY City, `Victim Gender`, `Crime Hour`, `Victim Age Group`
+)
+SELECT * FROM crime_stats ORDER BY `Crime Percentage` DESC LIMIT 25;
+
+# Key Insights :
+🔺 Most Affected Group:
+Mumbai (Elderly Females) and Delhi (Elderly Females) both top the list with 59 cases each, contributing ~3.08% each to total sexual assault crimes.
+
+The elderly (50+ years)—especially women—appear most frequently in the top rows, which is alarming.
+
+👵 Age Group Trends:
+Elderly (50+ yrs) victims dominate the list, indicating a worrying pattern of vulnerability among senior citizens.
+
+Middle-aged (31–50 yrs) and Adults (18–30 yrs) also appear, but less frequently in the top cases.
+
+👨‍👩‍👧‍👦 Gender Trends:
+Most cases involve female victims (F), but some male (M) and unspecified (X) gender victims are present, showing a broader spectrum of victimization.
+
+🏙️ City Hotspots:
+Delhi, Mumbai, Hyderabad, Bangalore, Kolkata, Chennai, Pune, Ahmedabad are recurrent—clearly hotspots for such violent incidents.
+
+Delhi appears most often across various gender and age groups.
+
+# Thank You for Reading 
+
+## 🧑‍💻 Author
+# Kunal Maheshwari
+Aspiring Data Engineer & Analyst
